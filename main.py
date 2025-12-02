@@ -40,7 +40,7 @@ folder_path_label = Label(frame, text="", pady=10, padx=10)
 folder_path_label.grid(column=1, row=2, columnspan=2)
 
 buton_select_folder = Button(frame, text="Select folder", command=select_folder).grid(column=1, row=4, columnspan=3)
-buton_select_folder = Button(frame, text="Run", command=exec_file_reading).grid(column=1, row=5, columnspan=3)
+buton_run = Button(frame, text="Run", command=exec_file_reading).grid(column=1, row=5, columnspan=3)
 window.title("App Prototype")
 window.mainloop()
 
