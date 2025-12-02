@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import Frame, Label, Button, filedialog
+from config.settings import USER_HOME_DIR, WINDOW_TITLE
 
 class MainWindow:
     def __init__(self, controller):
@@ -9,7 +10,7 @@ class MainWindow:
         self.controller.set_finished_callback(self.on_finished)
 
         self.window = tk.Tk()
-        self.window.title("App Prototype")
+        self.window.title(WINDOW_TITLE)
 
         self.selected_folder = None
 
@@ -28,7 +29,7 @@ class MainWindow:
         self.progress_label.grid(column=1, row=6, pady=10)
 
     def select_folder(self):
-        path = filedialog.askdirectory(initialdir="/home/paulo")
+        path = filedialog.askdirectory(initialdir=USER_HOME_DIR)
         self.selected_folder = path
         self.folder_path_label.config(text=f"Selected folder: {path.split('/')[-1]}")
         self.controller.set_selected_folder(path)

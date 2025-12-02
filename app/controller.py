@@ -2,14 +2,15 @@ import logging
 import threading
 from utils.file_utils import get_files_list_in_path
 from app.image_processor import load_image
+from config.settings import IMAGE_DEFAULT_FORMAT, SUPPORTED_IMAGE_FORMATS
 
 logger = logging.getLogger(__name__)
 
 class AppController:
     def __init__(self):
         self.selected_folder = None
-        self.selected_filetype = "png"
-        self.filetype_options = ["jpg", "jpeg", "png", "bmp"]
+        self.selected_filetype = IMAGE_DEFAULT_FORMAT
+        self.filetype_options = SUPPORTED_IMAGE_FORMATS
         self.processing_thread = None
         self.callback_progress = None
         self.callback_finished = None
