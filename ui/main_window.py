@@ -1,6 +1,7 @@
-import tkinter as tk
-from tkinter import Frame, Label, Button, filedialog
-from config.settings import USER_HOME_DIR, WINDOW_TITLE
+import webview
+from pathlib import Path
+from config.settings import WINDOW_TITLE, USER_HOME_DIR
+
 
 class MainWindow:
     def __init__(self, controller):
@@ -9,47 +10,46 @@ class MainWindow:
         self.controller.set_progress_callback(self.on_progress)
         self.controller.set_finished_callback(self.on_finished)
 
-        self.window = tk.Tk()
-        self.window.title(WINDOW_TITLE)
+        # A partir dessa classe é possível expor métodos do controller python para o javascript.
+        class API:
+            def __init__(self, controller):
+                self.controller = controller
 
-        self.selected_folder = None
+            def select_folder(self):
+                result = webview.windows[0].create_file_dialog(
+                    dialog_type=webview.FileDialog.FOLDER,
+                    directory=USER_HOME_DIR,
+                    allow_multiple=True
+                )
+                if result:
+                    folder = result[0]
+                    self.controller.set_selected_folder(folder)
+                    return folder
+                return None
 
-        self.frame = Frame(self.window, padx=40, pady=40)
-        self.frame.grid(column=1, row=1)
-        
-        Label(self.frame, text="Select a folder with images to process").grid(column=1, row=1, columnspan=2)
+            def run_processing(self):
+                self.controller.process_images()
+                return True
 
-        self.folder_path_label = Label(self.frame, text="")
-        self.folder_path_label.grid(column=1, row=2, columnspan=2)
+            def log(self, msg):
+                print("[JS]", msg)
 
-        Button(self.frame, text="Select folder", command=self.select_folder).grid(column=1, row=4)
-        Button(self.frame, text="Run", command=self.run_processing).grid(column=1, row=5)
+        self.api = API(controller)
 
-        self.progress_label = Label(self.frame, text="")
-        self.progress_label.grid(column=1, row=6, pady=10)
+    def run(self):
+        html_path = Path(__file__).parent / "views" / "index.html"
 
-    def select_folder(self):
-        path = filedialog.askdirectory(initialdir=USER_HOME_DIR)
-        self.selected_folder = path
-        self.folder_path_label.config(text=f"Selected folder: {path.split('/')[-1]}")
-        self.controller.set_selected_folder(path)
+        self.window = webview.create_window(
+            WINDOW_TITLE,
+            html_path.as_posix(),
+            js_api=self.api
+        )
 
-    def run_processing(self):
-        self.progress_label.config(text="Processing...")
-        self.controller.process_images()
+        webview.start(gui="qt", http_server=True)
 
     def on_progress(self, index, total, filename):
-        def update_label():
-            self.progress_label.config(
-                text=f"Processing {index}/{total}: {filename}"
-            )
-
-        self.window.after(0, update_label)
+        script = f"updateProgress({index}, {total}, '{filename}')"
+        self.window.evaluate_js(script)
 
     def on_finished(self):
-        def update_label():
-            self.progress_label.config(text="Finished!")
-        self.window.after(0, update_label)
-    
-    def run(self):
-        self.window.mainloop()
+        self.window.evaluate_js("onFinished()")
