@@ -18,6 +18,10 @@ class AppController:
     def add_selected_folder(self, folder: str):
         if not self.selected_folders:
             self.selected_folders = list()
+        
+        if folder in self.selected_folders:
+            return None
+
         self.selected_folders.append(folder)
         return folder
     
