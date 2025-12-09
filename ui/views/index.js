@@ -41,6 +41,7 @@ const removeFolder = (event) => {
     if (indexToRemove < 0)
         return;
 
+    api.remove_selected_folder(folders[indexToRemove].path);
     folders.splice(indexToRemove, 1);
     updateSelectedFoldersDisplay();
 }

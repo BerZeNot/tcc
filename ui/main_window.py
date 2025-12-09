@@ -23,9 +23,11 @@ class MainWindow:
                 )
                 if result:
                     folder = result[0]
-                    self.controller.set_selected_folder(folder)
-                    return folder
+                    return self.controller.add_selected_folder(folder)
                 return None
+
+            def remove_selected_folder(self, folder):
+                return self.controller.remove_selected_folder(folder)
 
             def run_processing(self):
                 self.controller.process_images()
