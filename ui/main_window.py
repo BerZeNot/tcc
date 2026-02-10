@@ -1,3 +1,9 @@
+import os
+import sys
+
+if sys.platform.startswith("linux"):
+    os.environ["LIBVA_DRIVER_NAME"] = "disable"
+
 import webview
 from pathlib import Path
 from config.settings import WINDOW_TITLE, USER_HOME_DIR
