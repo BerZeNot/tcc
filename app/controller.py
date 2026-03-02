@@ -32,8 +32,6 @@ class AppController:
             self.selected_folders.remove(folder)
         except ValueError:
             logger.warning(f"Couldn't remove folder {folder} from list because it not exists")
-        finally:
-            return self.selected_folders
 
     def set_progress_callback(self, callback):
         self.callback_progress = callback
