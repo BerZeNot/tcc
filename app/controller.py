@@ -1,8 +1,9 @@
 import logging
 import threading
-from utils.file_utils import get_files_list_in_path
+from datetime import datetime
+from utils.file_utils import get_files_list_in_path, create_folder
 from app.image_processor import load_image
-from config.settings import IMAGE_DEFAULT_FORMAT, SUPPORTED_IMAGE_FORMATS
+from config.settings import IMAGE_DEFAULT_FORMAT, SUPPORTED_IMAGE_FORMATS, DEFAULT_FOLDERS, USER_HOME_DIR, OUTPUT_FOLDER_BASE_NAME
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,7 @@ class AppController:
         self.processing_thread = None
         self.callback_progress = None
         self.callback_finished = None
+        self.output_folder_sufix = None
     
     def add_selected_folder(self, folder: str):
         if not self.selected_folders:
@@ -33,6 +35,12 @@ class AppController:
         except ValueError:
             logger.warning(f"Couldn't remove folder {folder} from list because it not exists")
 
+    def create_default_folders(self):
+        OUTPUT_FOLDER_NAME = f"{OUTPUT_FOLDER_BASE_NAME}_{self.output_folder_sufix}"
+        create_folder(USER_HOME_DIR, OUTPUT_FOLDER_NAME)
+        for folder in DEFAULT_FOLDERS:
+            create_folder(f"{USER_HOME_DIR}/{OUTPUT_FOLDER_NAME}", folder)
+
     def set_progress_callback(self, callback):
         self.callback_progress = callback
 
@@ -47,6 +55,11 @@ class AppController:
         if self.processing_thread and self.processing_thread.is_alive():
             logger.warning("Processing already running")
             return
+        
+        self.output_folder_sufix = datetime.now().strftime("%Y-%m-%d-%H:%M")
+        
+        self.create_default_folders()
+
         self.processing_thread = threading.Thread(
             target=self._worker,
             daemon=True
