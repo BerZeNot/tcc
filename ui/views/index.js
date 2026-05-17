@@ -49,6 +49,11 @@ const removeFolder = (event) => {
 function runProcessing() {
     if (!api) api = window.pywebview.api;
 
+    if (folders.length <= 0) {
+        alert("Please select a folder first")
+        return;
+    }
+
     document.getElementById("progress").innerText = "Processing...";
     api.run_processing();
 }
