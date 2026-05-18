@@ -35,8 +35,8 @@ class MainWindow:
             def remove_selected_folder(self, folder):
                 return self.controller.remove_selected_folder(folder)
 
-            def run_processing(self):
-                self.controller.process_images()
+            def run_processing(self, processing_options: dict):
+                self.controller.process_images(processing_options)
                 return True
 
             def log(self, msg):

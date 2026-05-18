@@ -1,5 +1,6 @@
 import cv2
 import os
+import numpy as np
 
 def load_image(full_path: str): 
     if not os.path.exists(full_path):
@@ -17,3 +18,19 @@ def assert_rgb_image(img):
         img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
         return img
     return img
+
+# Cut image edges in percentage%
+def cut_edges(img, percentage):
+    height, width = img.shape[:2]
+
+    cut_height = int(np.floor(height * (percentage / 100)))
+    cut_width  = int(np.floor(width  * (percentage / 100)))
+
+    newImg = img[
+        cut_height:height - cut_height,
+        cut_width:width - cut_width
+    ]
+    return newImg
+
+def write_image(path, img):
+    return cv2.imwrite(path, img)

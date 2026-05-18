@@ -10,9 +10,18 @@
 <body>
     <h1>Image processor</h1>
 
-    <p>Select a folder with images to process:</p>
-    <button onclick="selectFolder()">Select folder</button>
-    <p id="folder-name"></p>
+    <div class="input-section">
+        <p>Select a folder with images to process:</p>
+        <button onclick="selectFolder()">Select folder</button>
+        <p id="folder-name"></p>
+    </div>
+    <div class="input-section">
+        <p>Processing options</p>
+        <label for="cut-edges-percentage">Cut Edges:</label>
+        <input type="range" id="cut-edges-percentage" min="0" max="30" value="0"
+            oninput="this.nextElementSibling.value = `${this.value}%`">
+        <output id="cut-edges-percentage-preview">0%</output>
+    </div>
     <button id="run-processing" onclick="runProcessing()">Run Processing</button>
 
     <p id="progress"></p>

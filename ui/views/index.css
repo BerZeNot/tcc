@@ -8,3 +8,9 @@ button {
     cursor: pointer;
     margin: 8px 0;
 }
+
+.input-section {
+    border: solid 1px gray;
+    padding: 1rem;
+    margin: 0.5rem;
+}

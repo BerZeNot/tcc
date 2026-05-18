@@ -2,7 +2,7 @@ import logging
 import threading
 from datetime import datetime
 from utils.file_utils import get_files_list_in_path, create_folder
-from app.image_processor import load_image
+from app.image_processor import load_image, cut_edges, write_image
 from config.settings import IMAGE_DEFAULT_FORMAT, SUPPORTED_IMAGE_FORMATS, DEFAULT_FOLDERS, USER_HOME_DIR, OUTPUT_FOLDER_BASE_NAME
 
 logger = logging.getLogger(__name__)
@@ -16,6 +16,8 @@ class AppController:
         self.callback_progress = None
         self.callback_finished = None
         self.output_folder_sufix = None
+        self.output_folder_for_current_execution = None
+        self.processing_options = None
     
     def add_selected_folder(self, folder: str):
         if not self.selected_folders:
@@ -40,6 +42,7 @@ class AppController:
         create_folder(USER_HOME_DIR, OUTPUT_FOLDER_NAME)
         for folder in DEFAULT_FOLDERS:
             create_folder(f"{USER_HOME_DIR}/{OUTPUT_FOLDER_NAME}", folder)
+        self.output_folder_for_current_execution = f"{USER_HOME_DIR}/{OUTPUT_FOLDER_NAME}"
 
     def set_progress_callback(self, callback):
         self.callback_progress = callback
@@ -47,7 +50,10 @@ class AppController:
     def set_finished_callback(self, callback):
         self.callback_finished = callback
     
-    def process_images(self):
+    def process_images(self, processing_options: dict):
+        if processing_options:
+            self.processing_options = processing_options
+
         if not self.selected_folders:
             logger.warning("No folders selected!")
             return
@@ -81,8 +87,12 @@ class AppController:
                 full_path = f"{current_folder}/{file}"
 
                 try:
-                    img = load_image(full_path)
-                    print(f"Loaded {file}, shape={img.shape if img is not None else None}")
+                    image = load_image(full_path)
+                    print(f"Loaded {file}, shape={image.shape if image is not None else None}")
+                    cut_edges_percentage = int(self.processing_options["cut_edges"])
+                    if(cut_edges_percentage > 0):
+                        image = cut_edges(image, cut_edges_percentage)
+
                 except FileNotFoundError:
                     logger.warning(f"File not found: {full_path}")
                 

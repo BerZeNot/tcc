@@ -55,7 +55,8 @@ function runProcessing() {
     }
 
     document.getElementById("progress").innerText = "Processing...";
-    api.run_processing();
+    processingOptions = buildProcessingOptions()
+    api.run_processing(processingOptions);
 }
 
 function updateProgress(index, total, filename) {
@@ -64,4 +65,13 @@ function updateProgress(index, total, filename) {
 
 function onFinished() {
     document.getElementById("progress").innerText = "Finished!";
+}
+
+function buildProcessingOptions() {
+    var processingOptions = {}
+
+    cutEdgespercentage = document.getElementById("cut-edges-percentage").value || 0;
+    processingOptions["cut_edges"] = cutEdgespercentage;
+
+    return processingOptions;
 }
