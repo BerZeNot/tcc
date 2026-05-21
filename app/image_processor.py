@@ -1,6 +1,9 @@
 import cv2
 import os
+import logging
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 def load_image(full_path: str): 
     if not os.path.exists(full_path):
@@ -32,5 +35,17 @@ def cut_edges(img, percentage):
     ]
     return newImg
 
+
+def rgb2gray(img):
+    return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
+
+def gallus_segseq(imageInGrayScale, file):
+    logger.info(f"[INFO]: Processing file '{file}'")
+    logger.info(f"[INFO]: Image shape: {imageInGrayScale.shape}")
+    logger.info("[INFO]: Aplicando algoritmo de gallus_segseq")
+
+
 def write_image(path, img):
+    logger.info(f"[INFO]: writing image in path '{path}'")
     return cv2.imwrite(path, img)
