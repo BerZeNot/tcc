@@ -84,6 +84,8 @@ class AppController:
                 return
 
             for index, file in enumerate(files, start=1):
+                logger.info(f"valor de file: {file}")
+                filename, file_extension = file.rsplit('.', maxsplit=1)
                 full_path = f"{current_folder}/{file}"
 
                 try:
@@ -97,7 +99,7 @@ class AppController:
                     imageInGrayScale = rgb2gray(image)
 
                     # chama a função gallus_segseq passando a imagem em GrayScale e o nome do arquivo sem extenção
-                    gallus_segseq(imageInGrayScale, file)
+                    gallus_segseq(imageInGrayScale, filename)
 
                     # tira da memória a variável imageInGrayScale
                     # free(imageInGrayScale) // descobrir o análogo no python para evitar que o programa ocupe muita memória
