@@ -1,45 +1,48 @@
+import numpy as np
 from lib.get_zeros import get_zeros
 
-def get_mountains(vector,buf):
-    # divide a função em vários pedaços, "montanhas"
-    # isto é, de zero até uma valor máximo (ou mínimo) e de volta ao zero
-    # ERRO:
-    # o vetor deve ter tamanho 255 e as primeiras pontas são zeradas!
-    # o erro está muito baixo
-    #
-    # normalizei o vetor de comparacão para considerar como zeros valores
-    # 1e-5. Ver se esse é o método correto
-    #
-    #
+def get_mountains(vector, buf):
+    vector = np.asarray(vector)
 
-    #vecd = fftderiv(vector,n=1,sigma=3);
-    vecd = (vector)/(max(vector(:))-min(vector(:)));
+    # normalização
+    vecd = vector / (np.max(vector) - np.min(vector))
 
-    #encontrando os pontos que são zeros
+    # zerando as bordas
+    vecd[:buf] = 0
+    vecd[-buf:] = 0
 
-    vecd(1:buf) = 0;
-    vecd(end-buf:end) = 0;
+    # regiões de zero
+    zeros = get_zeros(vecd, 1e-4)
 
-    zer = get_zeros(vecd,1e-4);
+    p1 = zeros[:-1, 1]
+    p2 = zeros[1:, 0]
 
-    p1 = zer(1:end-1,2);
-    p2 = zer(2:end,1);
+    mon = np.zeros_like(vecd, dtype=int)
 
-    mon = zeros(size(vecd));
-    mon_max = [];
-    mon_max_pos = [];
+    mon_max = []
+    mon_max_pos = []
 
     # montanhas iniciais
-    for ip=1:numel(p1)
-    val = vector(p1(ip):p2(ip));
-    [mmax, mmaxpos] = max(abs(val(:)));
-    mon_max(ip) = mmax;
-    mon_max_pos(ip) = p1(ip) + mmaxpos -1;
-    end
-    [mon_max,k] = sort(mon_max,'descend');
-    mon_max_pos = mon_max_pos(k);
+    for ip in range(len(p1)):
+        val = vector[p1[ip]:p2[ip] + 1]
+
+        mmaxpos = np.argmax(np.abs(val))
+        mmax = np.abs(val[mmaxpos])
+
+        mon_max.append(mmax)
+        mon_max_pos.append(p1[ip] + mmaxpos)
+    
+    mon_max = np.asarray(mon_max)
+    mon_max_pos = np.asanyarray(mon_max_pos)
+
+    #ordenação decrescente
+    k = np.argsort(mon_max)[::-1]
+
+    mon_max = mon_max[k]
+    mon_max_pos = mon_max_pos[k]
 
     # montanhas ordenadas
-    for ip=1:numel(p1)
-    mon(p1(k(ip)):p2(k(ip)))= ip;
-    end
+    for ip in range(len(p1)):
+        mon[p1[k[ip]]:p2[k[ip]]+1] = ip + 1
+    
+    return mon, mon_max, mon_max_pos
