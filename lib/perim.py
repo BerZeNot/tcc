@@ -1,5 +1,5 @@
 import numpy as np
-import follow
+from follow import follow
 
 def perim(img):
     x, y = follow(img)
