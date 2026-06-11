@@ -1,7 +1,7 @@
 import numpy as np
 
-def follow(img, nhood=8):
-    if nhood == 8:
+def follow(image, neighborhood=8):
+    if neighborhood == 8:
         path = np.array([
             [ 0,  1],
             [-1,  1],
@@ -17,7 +17,7 @@ def follow(img, nhood=8):
         nxt = np.array([1,2,3,4,5,6,7,0])
         inv = np.array([4,5,6,7,0,1,2,3])
 
-    elif nhood == 4:
+    elif neighborhood == 4:
         path = np.array([
             [-1, 0],
             [ 0, 1],
@@ -32,11 +32,11 @@ def follow(img, nhood=8):
     else:
         raise ValueError("Invalid neighborhood number")
     
-    img = np.pad(img, 1)
+    image = np.pad(image, 1)
 
-    idx = np.flatnonzero(img == 1)[0]
+    idx = np.flatnonzero(image == 1)[0]
 
-    rows = img.shape[0]
+    rows = image.shape[0]
 
     j = idx // rows
     i = idx - j * rows
@@ -64,13 +64,13 @@ def follow(img, nhood=8):
             ni = neighbours[cane, 0]
             nj = neighbours[cane, 1]
 
-            if img[ni, nj] != 0 or cane == cini:
+            if image[ni, nj] != 0 or cane == cini:
                 break
         
         ni = neighbours[cane, 0]
         nj = neighbours[cane, 1]
 
-        if img[ni, nj] == 1:
+        if image[ni, nj] == 1:
 
             di, dj = path[cane]
 
