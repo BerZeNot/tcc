@@ -4,6 +4,8 @@ import logging
 import numpy as np
 from cv2.typing import MatLike
 from lib.image import image_adjust, apply_gausian_filter, normalize_histogram_spread 
+from lib.gallus_segment import gallus_segment
+from lib.gallus_clean_cc import gallus_clean_cc
 
 logger = logging.getLogger(__name__)
 
@@ -41,77 +43,52 @@ def cut_edges(img, percentage):
 def rgb2gray(img):
     return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-# TODO: complete function implementation
-def gallus_segseq(imageInGrayScale, filename):
-    #function [imseg,thr_im]=gallus_segseq(im,im_file)
-    # Autor: Bruno A. N. Travençolo
-    # FACOM - UFU
-    # Data: 21/07/2010 last update 05/10/2011
-    #
-    # Segmentar a imagem de espermatozóides
-
-
-    #uniformizando a imagem
-    #im = medfilt2(im,[5 5]);
-    #im = imtophat(im,strel('disk',15));
-    imageInGrayScale = image_adjust.cv2(imageInGrayScale)
+def gallus_segseq(imageInGrayScale, filename, aux_files_path):
+    
+    imageInGrayScale = image_adjust(imageInGrayScale)
 
     # smoothing image      
     image_gauss =  apply_gausian_filter(imageInGrayScale,1)
-    #im_gauss = im;
 
     #aumentando o espalhamento do histograma
-    im_gauss = normalize_histogram_spread(im_gauss)
+    image_gauss = normalize_histogram_spread(image_gauss)
+
     # segmentando a imagem
-    im_seg_g = gallus_segment(im_gauss);
+    im_seg_g, _ = gallus_segment(image_gauss)
 
     # limpando componentes conexos pequenos
-
-    
-    se = strel('disk',1,0);
-    im_seg_clean_g = imerode( im_seg_g,se);  
-    # im_seg_clean_g =  im_seg_g;  
+    se = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
+    im_seg_clean_g = cv2.erode(im_seg_g.astype(np.uint8), se)
     
     # colocando uma borda ao redor da imagem para eliminar, por tamanho
     # os espermatozóides de borda
     borda=25
-    im_seg_clean_g(1:borda,:) = 1;
-    im_seg_clean_g(:,1:borda) = 1;
-    im_seg_clean_g(end-borda:end,:) = 1;
-    im_seg_clean_g(:,end-borda:end) = 1;
+
+    im_seg_clean_g[:borda, :] = 1
+    im_seg_clean_g[:, :borda] = 1
+    im_seg_clean_g[-borda:, :] = 1
+    im_seg_clean_g[:, -borda:] = 1
     
     # Parâmetros para limpar os componentes conexos
-    maxsize = 70*3*1.15; 
-    minsize = 70*2
+    maxsize = 70 * 3 * 1.15 
+    minsize = 70 * 2
 
-    im_seg_clean_g = gallus_cleancc(im_seg_clean_g,minsize,maxsize,0)
+    im_seg_clean_g = gallus_clean_cc(im_seg_clean_g,minsize,maxsize,0)
 
-
-    # utilizando Erosao/Dilatação para remover a cauda   
-    #im_ed_g = bull_erodedilate(im_seg_clean_g);
-
-    # limpando componentes conexos pequenos novamente
-    #maxsize = 1*60*60;  # diminuindo o tamanho máximo
-    #minsize = 1*30*30;
-    #im_ed_g_cleancc = cleancc(im_ed_g,minsize,maxsize);# jah faz o bw_label
-
-    ### salvando os resultados
-
-    write_image(im_gauss/255.0, ['aux_files\\',filename,'_g_gau.png']  )
-    write_image(im_seg_g,       ['aux_files\\',filename,'_g_seg.png']  )
-    #imwrite(im_seg_clean_g, ['aux_files\\',im_file,'_g_seg_clean.png']  );
-    #imwrite(im_ed_g,        ['aux_files\\',im_file,'_g_seg_ed_g.png']);
-    #imwrite(im_ed_g_cleancc,        ['aux_files\\',im_file,'_g_seg_clean_ed.png']);
-    write_image(im_seg_clean_g,        ['aux_files\\',filename,'_seg.png'])
+    ## salvando os resultados
+    write_image(f"{aux_files_path}/{filename}_g_gau.png", image_gauss)
+    write_image(f"{aux_files_path}/{filename}_g_seg.png", im_seg_g)
+    write_image(f"{aux_files_path}/{filename}_seg.png", im_seg_clean_g)
 
     #resultado final
     imseg = im_seg_clean_g
     thr_im = im_seg_g
-
-# TODO: complete function implementation
-def gallus_segment(image: MatLike):
-    return
+    return imseg, thr_im
 
 def write_image(path, img):
     logger.info(f"Writing image in path '{path}'")
+
+    if img.dtype != np.uint8:
+        img = np.clip(img * 255, 0, 255).astype(np.uint8)
+
     return cv2.imwrite(path, img)
