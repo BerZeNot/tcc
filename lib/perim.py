@@ -1,5 +1,6 @@
 import numpy as np
-from follow import follow
+from lib.follow import follow
+
 
 def perim(img):
     x, y = follow(img)
@@ -9,9 +10,6 @@ def perim(img):
 
     p = np.sum(np.hypot(dx, dy))
 
-    p += np.hypot(
-        x[-1] - x[0],
-        y[-1] - y[0]
-    )
+    p += np.hypot(x[-1] - x[0], y[-1] - y[0])
 
     return float(p)
