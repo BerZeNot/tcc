@@ -70,8 +70,10 @@ function onFinished() {
 function buildProcessingOptions() {
     var processingOptions = {}
 
-    cutEdgespercentage = document.getElementById("cut-edges-percentage").value || 0;
+    const cutEdgespercentage = document.getElementById("cut-edges-percentage").value ?? 0;
+    const invertSegmentImages = document.getElementById("invert-segmented-images").checked ?? false;
     processingOptions["cut_edges"] = cutEdgespercentage;
+    processingOptions["invert_segmented_images"] = invertSegmentImages;
 
     return processingOptions;
 }
