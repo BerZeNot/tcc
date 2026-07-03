@@ -4,9 +4,11 @@ from lib.getbb import getbb
 from lib.PCAxy import PCAxy
 from lib.perim import perim
 from lib.entropy import entropy
+from textwrap import dedent
+import os.path as path
 
 
-def gallus_sep_heads(imo, im_seg, im_file, print_image, manual_seg):
+def gallus_sep_heads(imo, im_seg, im_file, print_image, base_folder_path):
     n_ids, bw_im = cv2.connectedComponents(im_seg, connectivity=4)
     imo_selected = imo
     res = []
@@ -15,7 +17,7 @@ def gallus_sep_heads(imo, im_seg, im_file, print_image, manual_seg):
     for ind_id in range(1, n_ids):
 
         basefilenamehead = f"{im_file}_h{valid_id}"
-        basefilename = f"heads/{basefilenamehead}"
+        basefilename = path.join("heads", basefilenamehead)
 
         imbb_seg, original_index, origin = getbb(bw_im, ind_id, 1, True)
         imbb = np.zeros((*imbb_seg.shape, 3), dtype=np.uint8)
@@ -28,7 +30,8 @@ def gallus_sep_heads(imo, im_seg, im_file, print_image, manual_seg):
 
         imbb[im_index] = temp
 
-        # TODO: Chances extremamente altas dessas duas variáveis e chamada para PCAxy serem completamente inúteis nesse contexto (remover se for o caso)
+        # TODO: Chances extremamente altas dessas duas variáveis e chamada para PCAxy serem
+        # completamente inúteis nesse contexto (remover se for o caso)
         aVal, aVec = PCAxy(im_x, im_y)
 
         head_skeleton = f"{basefilename}_Skeleton.png"
@@ -55,7 +58,6 @@ def gallus_sep_heads(imo, im_seg, im_file, print_image, manual_seg):
 
         bending = 0
 
-        # converting to LAB
         lab = cv2.cvtColor(imbb, cv2.COLOR_RGB2LAB)
 
         LAB_l = lab[:, :, 0].astype(np.float64)
@@ -77,51 +79,45 @@ def gallus_sep_heads(imo, im_seg, im_file, print_image, manual_seg):
 
         if valid:
             if print_image:
-                cv2.imwrite(head_skeleton, SK_imbb_seg)
+                cv2.imwrite(path.join(base_folder_path, head_skeleton), SK_imbb_seg)
 
-            # TODO: Validar se de fato devo salvar as imagens em bitmap (.bmp)
-            # direto ou se devo seguir o formato selecionado da interface
             head_seg_fn = f"{basefilename}_seg.bmp"
             head_ori_fn = f"{basefilename}_ori.bmp"
 
             if print_image:
-                cv2.imwrite(head_ori_fn, imbb)
-                cv2.imwrite(head_seg_fn, imbb_seg.astype(np.uint8) * 255)
+                cv2.imwrite(path.join(base_folder_path, head_ori_fn), imbb)
+                cv2.imwrite(
+                    path.join(base_folder_path, head_seg_fn),
+                    imbb_seg.astype(np.uint8) * 255,
+                )
 
-            # TODO: Validar o formato desse arquivo tbm (se deve ser png ou outro)
             head_gray_fn = f"{basefilename}_Gray.png"
 
             if print_image:
-                cv2.imwrite(head_gray_fn, LAB_l.astype(np.uint8))
-
-            # TODO: se der pau, pode ser porquê imo está em BGR, então o correto será:
-            # imo_selected[original_index] = [0, 0, 255]
-            # Consultar em https://chatgpt.com/g/g-p-693260cf8fd0819195b689d6eb55041e-tcc/c/6a3b4ca0-3e20-83e9-b854-359426198315
-            imo_selected[original_index] = [255, 0, 0]
-
-            # writing the results to an html file
-            # TODO: adequar o caminho do arquivo html para o diretório base/auxiliary_files
-            # (ou algo assim)
-            # TODO: Extrair a escrita de arquivo html para uma função
-            with open(f"{basefilename}.html", "w") as fd:
-                fd.write(f"<b>ID: </b>{valid_id} - {im_file}<br>\n")
-                fd.write(f"<b>Valid: </b>{valid}<br>\n")
-                fd.write(f'<img src="{basefilenamehead}.bmp"><br>\n')
-                fd.write(f"<b>Area: </b>{area}<br>\n")
-                fd.write(f"<b>Perimeter: </b>{p}<br>\n")
-                fd.write(f'<img src="{basefilenamehead}_Skeleton.png"><br>\n')
-                fd.write(
-                    "<b>Texture (standard deviation of the gray level of the pixels): </b>"
-                    f"{t}<br>\n"
+                cv2.imwrite(
+                    path.join(base_folder_path, head_gray_fn), LAB_l.astype(np.uint8)
                 )
-                fd.write(f"<b>Entropy: </b>{h}<br>\n")
-                fd.write(f"<b>Blue index: </b>{blue_index}<br>\n")
-                fd.write(f"<b>Mean pixel value (grayscale): </b>{pix_mean}<br>\n")
-                fd.write(f'<img src="{basefilenamehead}_Gray.png"><br>\n')
-                fd.write(f"<b>NEndPoints: </b>{nendpoints}<br>\n")
-                fd.write(f"<b>NBranches: </b>{nbranches}<br>\n")
-                fd.write(f"<b>Skeleton Length </b>{skelength}<br>\n")
-                fd.write(f"<b>Bending Energy: </b>{bending}<br>\n")
+
+            imo_selected[original_index] = [0, 0, 255]
+
+            write_in_html(
+                base_folder_path,
+                basefilename,
+                valid_id,
+                im_file,
+                valid,
+                basefilenamehead,
+                t,
+                area,
+                p,
+                h,
+                blue_index,
+                pix_mean,
+                nendpoints,
+                nbranches,
+                skelength,
+                bending,
+            )
 
             resh = [
                 valid_id,
@@ -140,7 +136,9 @@ def gallus_sep_heads(imo, im_seg, im_file, print_image, manual_seg):
 
             res.append(resh)
             np.savetxt(
-                f"{basefilename}.txt", np.asarray(resh).reshape(1, -1), fmt="%.10f"
+                path.join(base_folder_path, f"{basefilename}.txt"),
+                np.asarray(resh).reshape(1, -1),
+                fmt="%.10f",
             )
 
             valid_id += 1
@@ -159,3 +157,43 @@ def gallus_sep_heads(imo, im_seg, im_file, print_image, manual_seg):
         "Bending energy",
     ]
     return np.asarray(res), res_colname, imo_selected
+
+
+def write_in_html(
+    base_folder_path,
+    basefilename,
+    valid_id,
+    im_file,
+    valid,
+    basefilenamehead,
+    t,
+    area,
+    p,
+    h,
+    blue_index,
+    pix_mean,
+    nendpoints,
+    nbranches,
+    skelength,
+    bending,
+):
+    html = dedent(f"""\
+    <b>ID: </b>{valid_id} - {im_file}<br>
+    <b>Valid: </b>{valid}<br>
+    <img src="{basefilenamehead}_ori.bmp"><br>
+    <b>Area: </b>{area}<br>
+    <b>Perimeter: </b>{p}<br>
+    <img src="{basefilenamehead}_Skeleton.png"><br>
+    <b>Texture (standard deviation of the gray level of the pixels): </b>{t}<br>
+    <b>Entropy: </b>{h}<br>
+    <b>Blue index: </b>{blue_index}<br>
+    <b>Mean pixel value (grayscale): </b>{pix_mean}<br>
+    <img src="{basefilenamehead}_Gray.png"><br>
+    <b>NEndPoints: </b>{nendpoints}<br>
+    <b>NBranches: </b>{nbranches}<br>
+    <b>Skeleton Length </b>{skelength}<br>
+    <b>Bending Energy: </b>{bending}<br>
+    """)
+
+    with open(path.join(base_folder_path, f"{basefilename}.html"), "w") as fd:
+        fd.write(html)
