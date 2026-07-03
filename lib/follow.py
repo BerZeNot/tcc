@@ -1,90 +1,39 @@
+import cv2
 import numpy as np
 
-def follow(image, neighborhood=8):
-    if neighborhood == 8:
-        path = np.array([
-            [ 0,  1],
-            [-1,  1],
-            [-1,  0],
-            [-1, -1],
-            [ 0, -1],
-            [ 1, -1],
-            [ 1,  0],
-            [ 1,  1]
-        ])
 
-        cane = 4 
-        nxt = np.array([1,2,3,4,5,6,7,0])
-        inv = np.array([4,5,6,7,0,1,2,3])
+def follow(image: np.ndarray):
+    """
+    Extrai o contorno externo de um objeto binário.
 
-    elif neighborhood == 4:
-        path = np.array([
-            [-1, 0],
-            [ 0, 1],
-            [ 1, 0],
-            [ 0,-1]
-        ])
+    Parameters
+    ----------
+    image : np.ndarray
+        Imagem binária contendo valores 0 e 1 (ou 0 e 255).
 
-        cane = 3
-        nxt = np.array([1,2,3,0])
-        inv = np.array([2,3,0,1])
+    Returns
+    -------
+    x : np.ndarray
+        Coordenadas x do contorno.
+    y : np.ndarray
+        Coordenadas y do contorno (origem no canto inferior esquerdo,
+        compatível com a implementação original em Octave).
+    """
 
-    else:
-        raise ValueError("Invalid neighborhood number")
-    
-    image = np.pad(image, 1)
+    binary = (image != 0).astype(np.uint8)
 
-    idx = np.flatnonzero(image == 1)[0]
+    contours, _ = cv2.findContours(
+        binary,
+        cv2.RETR_EXTERNAL,
+        cv2.CHAIN_APPROX_NONE,
+    )
 
-    rows = image.shape[0]
+    if not contours:
+        return np.empty(0, dtype=np.int32), np.empty(0, dtype=np.int32)
 
-    j = idx // rows
-    i = idx - j * rows
+    contour = contours[0][:, 0]
 
-    neighbours = np.zeros_like(path)
-    neighbours[:, 0] = path[:, 0] + i
-    neighbours[:, 1] = path[:, 1] + j
+    x = contour[:, 0]
+    y = binary.shape[0] - 1 - contour[:, 1]
 
-    x = []
-    y = []
-
-    start_i = i
-    start_j = j
-
-    finished = False
-
-    while not finished:
-        x.append(j - 2)
-        y.append(rows - 2 - i)
-
-        cini = cane
-        while True:
-            cane = nxt[cane]
-
-            ni = neighbours[cane, 0]
-            nj = neighbours[cane, 1]
-
-            if image[ni, nj] != 0 or cane == cini:
-                break
-        
-        ni = neighbours[cane, 0]
-        nj = neighbours[cane, 1]
-
-        if image[ni, nj] == 1:
-
-            di, dj = path[cane]
-
-            i += di
-            j += dj
-
-            neighbours[:, 0] += di
-            neighbours[:, 1] += dj
-
-            cane = inv[cane]
-
-            finished = (i == start_i and j == start_j)
-        
-        else:
-            finished = True
-
-    return np.asarray(x), np.asarray(y)
+    return x, y
