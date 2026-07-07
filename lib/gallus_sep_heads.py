@@ -13,7 +13,7 @@ def gallus_sep_heads(imo, im_seg, im_file, print_image, base_folder_path):
     imo_selected = imo
     res = []
 
-    valid_id = 1
+    valid_id = 0
     for ind_id in range(1, n_ids):
 
         basefilenamehead = f"{im_file}_h{valid_id}"
