@@ -74,6 +74,7 @@ function buildProcessingOptions() {
     const invertSegmentImages = document.getElementById("invert-segmented-images").checked ?? false;
     processingOptions["cut_edges"] = cutEdgespercentage;
     processingOptions["invert_segmented_images"] = invertSegmentImages;
+    processingOptions["segment_images"] = false;
 
     return processingOptions;
 }
