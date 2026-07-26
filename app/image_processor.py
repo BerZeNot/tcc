@@ -6,7 +6,7 @@ import os.path as path
 from cv2.typing import MatLike
 from lib.image import image_adjust, apply_gausian_filter, normalize_histogram_spread
 from lib.gallus_segment import gallus_segment
-from lib.gallus_clean_cc import gallus_clean_cc
+from lib.clean_connected_components import clean_connected_components
 from lib.bull_erode_dilate import bull_erodedilate
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ def gallus_segseq(imageInGrayScale, filename, aux_files_path):
     maxsize = 70 * 3 * 1.15
     minsize = 70 * 2
 
-    im_seg_clean_g = gallus_clean_cc(im_seg_clean_g, minsize, maxsize, 0)
+    im_seg_clean_g = clean_connected_components(im_seg_clean_g, minsize, maxsize, 0)
 
     ## salvando os resultados
     img_g_gau_path = path.join(aux_files_path, f"{filename}_g_gau.png")
@@ -109,7 +109,7 @@ def bull_segseq(image_in_gray_scale, filename, aux_files_path):
     maxsize = 100 * 150
     minsize = 10
 
-    image_gauss_seg_cleancc = gallus_clean_cc(
+    image_gauss_seg_cleancc = clean_connected_components(
         image_gauss_seg,
         minsize,
         maxsize,
@@ -126,7 +126,7 @@ def bull_segseq(image_in_gray_scale, filename, aux_files_path):
     maxsize = 130 * 80
     minsize = maxsize / 5
 
-    image_gauss_seg_cleancc_erodedilate_cleancc = gallus_clean_cc(
+    image_gauss_seg_cleancc_erodedilate_cleancc = clean_connected_components(
         image_gauss_seg_cleancc_erodedilate,
         minsize,
         maxsize,
