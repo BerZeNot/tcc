@@ -2,6 +2,7 @@ import cv2
 import os
 import logging
 import numpy as np
+import os.path as path
 from cv2.typing import MatLike
 from lib.image import image_adjust, apply_gausian_filter, normalize_histogram_spread
 from lib.gallus_segment import gallus_segment
@@ -84,9 +85,12 @@ def gallus_segseq(imageInGrayScale, filename, aux_files_path):
     im_seg_clean_g = gallus_clean_cc(im_seg_clean_g, minsize, maxsize, 0)
 
     ## salvando os resultados
-    write_image(f"{aux_files_path}/{filename}_g_gau.png", image_gauss)
-    write_image(f"{aux_files_path}/{filename}_g_seg.png", im_seg_g)
-    write_image(f"{aux_files_path}/{filename}_seg.png", im_seg_clean_g)
+    img_g_gau_path = path.join(aux_files_path, f"{filename}_g_gau.png")
+    img_g_seg_path = path.join(aux_files_path, f"{filename}_g_seg.png")
+    img_seg_path = path.join(aux_files_path, f"{filename}_seg.png")
+    write_image(img_g_gau_path, image_gauss)
+    write_image(img_g_seg_path, im_seg_g)
+    write_image(img_seg_path, im_seg_clean_g)
 
     # resultado final
     imseg = im_seg_clean_g
@@ -133,33 +137,50 @@ def bull_segseq(image_in_gray_scale, filename, aux_files_path):
     )
 
     # salvando os resultados
+    img_gauss_tmp_path = path.join(aux_files_path, f"{filename}_01_gauss_tmp.png")
     write_image(
-        f"{aux_files_path}/{filename}_01_gauss_tmp.png",
+        img_gauss_tmp_path,
         image_gauss / 255.0,
     )
 
-    write_image(
-        f"{aux_files_path}/{filename}_02_gauss_seg_tmp.png",
-        image_gauss_seg,
+    img_gauss_seg_tmp_path = path.join(
+        aux_files_path, f"{filename}_02_gauss_seg_tmp.png"
     )
+    write_image(img_gauss_seg_tmp_path, image_gauss_seg)
 
+    img_gauss_seg_cleancc_tmp_path = path.join(
+        aux_files_path,
+        f"{filename}_03_gauss_seg_cleancc_tmp.png",
+    )
     write_image(
-        f"{aux_files_path}/{filename}_03_gauss_seg_cleancc_tmp.png",
+        img_gauss_seg_cleancc_tmp_path,
         image_gauss_seg_cleancc,
     )
 
+    img_gauss_seg_cleancc_erodedilate_tmp_path = path.join(
+        aux_files_path,
+        f"{filename}_04_gauss_seg_cleancc_erodedilate_tmp.png",
+    )
     write_image(
-        f"{aux_files_path}/{filename}_04_gauss_seg_cleancc_erodedilate_tmp.png",
+        img_gauss_seg_cleancc_erodedilate_tmp_path,
         image_gauss_seg_cleancc_erodedilate,
     )
 
+    img_gauss_seg_cleancc_erodedilate_cleancc_tmp_path = path.join(
+        aux_files_path,
+        f"{filename}_05_gauss_seg_cleancc_erodedilate_cleancc_tmp.png",
+    )
     write_image(
-        f"{aux_files_path}/{filename}_05_gauss_seg_cleancc_erodedilate_cleancc_tmp.png",
+        img_gauss_seg_cleancc_erodedilate_cleancc_tmp_path,
         image_gauss_seg_cleancc_erodedilate_cleancc,
     )
 
+    img_gauss_seg_cleancc_erodedilate_cleancc_closing_tmp_path = path.join(
+        aux_files_path,
+        f"{filename}_06_gauss_seg_cleancc_erodedilate_cleancc_closing_tmp.png",
+    )
     write_image(
-        f"{aux_files_path}/{filename}_06_gauss_seg_cleancc_erodedilate_cleancc_closing_tmp.png",
+        img_gauss_seg_cleancc_erodedilate_cleancc_closing_tmp_path,
         image_gauss_seg_cleancc_erodedilate_cleancc_closing,
     )
 
@@ -167,10 +188,8 @@ def bull_segseq(image_in_gray_scale, filename, aux_files_path):
     imseg = image_gauss_seg_cleancc_erodedilate_cleancc_closing
     thr_im = image_gauss_seg
 
-    write_image(
-        f"{aux_files_path}/{filename}_seg.png",
-        imseg,
-    )
+    segmented_image_path = path.join(aux_files_path, f"{filename}_seg.png")
+    write_image(segmented_image_path, imseg)
 
     return imseg, thr_im
 
