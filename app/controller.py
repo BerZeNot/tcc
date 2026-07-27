@@ -87,7 +87,7 @@ class AppController:
             logger.warning("Processing already running")
             return
 
-        self.output_folder_sufix = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+        self.output_folder_sufix = datetime.now().strftime("%Y-%m-%d-%Hh%Mm%Ss")
 
         self.create_default_folders()
 
