@@ -1,5 +1,6 @@
 let api = null;
 const folders = []
+
 function selectFolder() {
     if (!api) api = window.pywebview.api;
 
@@ -14,6 +15,7 @@ function selectFolder() {
         }
     });
 }
+
 const updateSelectedFoldersDisplay = () => {
     let foldersListing = document.getElementById("folder-name")
     foldersListing.innerHTML = '';
@@ -31,6 +33,7 @@ const updateSelectedFoldersDisplay = () => {
         });
     }
 }
+
 const removeFolder = (event) => {
     const folderNameInBase64 = event.target.attributes['folderNameInBase64'].value;
     if (!folderNameInBase64)
@@ -72,9 +75,12 @@ function buildProcessingOptions() {
 
     const cutEdgespercentage = document.getElementById("cut-edges-percentage").value ?? 0;
     const invertSegmentImages = document.getElementById("invert-segmented-images").checked ?? false;
+    const sperm_type = document.getElementById("sperm-type").value ?? "BULL";
+
     processingOptions["cut_edges"] = cutEdgespercentage;
     processingOptions["invert_segmented_images"] = invertSegmentImages;
     processingOptions["segment_images"] = false;
+    processingOptions["sperm_type"] = sperm_type;
 
     return processingOptions;
 }

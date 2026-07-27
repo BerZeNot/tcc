@@ -6,6 +6,7 @@ from datetime import datetime
 from textwrap import dedent
 from utils.file_utils import get_files_list_in_path, create_folder
 from lib.gallus_sep_heads import gallus_sep_heads
+from lib.bull_sep_heads import bull_sep_heads
 from lib.bull_semiagr_measurements import bull_semiagr_measurements
 from app.image_processor import (
     load_image,
@@ -13,6 +14,7 @@ from app.image_processor import (
     write_image,
     rgb2gray,
     gallus_segseq,
+    bull_segseq,
     invert_image,
 )
 from config.settings import (
@@ -99,6 +101,9 @@ class AppController:
         all_html_file_str = []
         all_image_file_str = []
 
+        selected_sperma_type = self.processing_options["sperm_type"]
+        logger.info(f"SELECTED SPERMA TYPE: {selected_sperma_type}")
+
         for current_folder in self.selected_folders:
             files = get_files_list_in_path(current_folder, self.selected_filetype)
 
@@ -113,8 +118,8 @@ class AppController:
 
             for index, file in enumerate(files, start=1):
                 logger.info(f"valor de file: {file}")
-                filename, file_extension = file.rsplit(".", maxsplit=1)
-                full_path = f"{current_folder}/{file}"
+                filename = file.rsplit(".", maxsplit=1)[0]
+                full_path = path.join(current_folder, file)
 
                 try:
                     aux_files_path = path.join(
@@ -132,15 +137,18 @@ class AppController:
 
                     segmented_image_path = path.join(aux_files_path, seg_file_name)
 
-                    # o formato do arquivo tá fazendo com que as funções dependem de segmented_image_exists
-                    # não sejam executadas
-                    logger.info(f"segmented_image_path: {segmented_image_path}")
                     if (
                         not path.exists(segmented_image_path)
                         or self.processing_options["segment_images"]
                     ):
                         imageInGrayScale = rgb2gray(image)
-                        gallus_segseq(imageInGrayScale, filename, aux_files_path)
+
+                        if selected_sperma_type == "GALLUS":
+                            gallus_segseq(imageInGrayScale, filename, aux_files_path)
+
+                        if selected_sperma_type == "BULL":
+                            bull_segseq(imageInGrayScale, filename, aux_files_path)
+
                         del imageInGrayScale
 
                     # head separation routine
@@ -152,13 +160,23 @@ class AppController:
                         if self.processing_options["invert_segmented_images"]:
                             segmented_image = invert_image(segmented_image)
 
-                        res, res_colname, valid_seg_im = gallus_sep_heads(
-                            image,
-                            segmented_image,
-                            filename,
-                            True,
-                            self.output_folder_for_current_execution,
-                        )
+                        if selected_sperma_type == "GALLUS":
+                            res, res_colname, valid_seg_im = gallus_sep_heads(
+                                image,
+                                segmented_image,
+                                filename,
+                                True,
+                                self.output_folder_for_current_execution,
+                            )
+
+                        if selected_sperma_type == "BULL":
+                            res, res_colname, valid_seg_im = bull_sep_heads(
+                                image,
+                                segmented_image,
+                                filename,
+                                True,
+                                self.output_folder_for_current_execution,
+                            )
 
                         write_image(
                             path.join(aux_files_path, f"{filename}_seg2.png"),
