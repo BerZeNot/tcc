@@ -46,7 +46,13 @@
         Run Processing
     </button>
 
-    <p id="progress"></p>
+    <p id="progress-text"></p>
+    <div hidden id="progress-bar-section">
+        <div class="progress">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span id="progressLabel">0%</span>
+    </div>
 
     <script src="index.js"></script>
 </body>

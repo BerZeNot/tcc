@@ -277,4 +277,4 @@ class AppController:
             fmtype.write("</body></html>")
 
         if self.callback_finished:
-            self.callback_finished()
+            self.callback_finished(self.output_folder_for_current_execution)

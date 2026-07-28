@@ -25,7 +25,7 @@ class MainWindow:
                 result = webview.windows[0].create_file_dialog(
                     dialog_type=webview.FileDialog.FOLDER,
                     directory=USER_HOME_DIR,
-                    allow_multiple=True
+                    allow_multiple=True,
                 )
                 if result:
                     folder = result[0]
@@ -48,9 +48,7 @@ class MainWindow:
         html_path = Path(__file__).parent / "views" / "index.html"
 
         self.window = webview.create_window(
-            WINDOW_TITLE,
-            html_path.as_posix(),
-            js_api=self.api
+            WINDOW_TITLE, html_path.as_posix(), js_api=self.api
         )
 
         webview.start(gui="qt", http_server=True)
@@ -59,5 +57,6 @@ class MainWindow:
         script = f"updateProgress({index}, {total}, '{filename}')"
         self.window.evaluate_js(script)
 
-    def on_finished(self):
-        self.window.evaluate_js("onFinished()")
+    def on_finished(self, output_folder):
+        script = f"onFinished('{output_folder}')"
+        self.window.evaluate_js(script)

@@ -75,17 +75,40 @@ function runProcessing() {
         return;
     }
 
-    document.getElementById("progress").innerText = "Processing...";
+    document.getElementById("progress-text").innerText = "Processing...";
+    showProgressBar();
     processingOptions = buildProcessingOptions()
     api.run_processing(processingOptions);
 }
 
-function updateProgress(index, total, filename) {
-    document.getElementById("progress").innerText = `Processing ${index}/${total}: ${filename}`
+const showProgressBar = () => {
+    document.getElementById("progress-bar-section").hidden = false;
 }
 
-function onFinished() {
-    document.getElementById("progress").innerText = "Finished!";
+const hideProgressBar = () => {
+    document.getElementById("progress-bar-section").hidden = true;
+    document.getElementById("progressFill").style.width = `${0}%`;
+    document.getElementById("progressLabel").textContent = `${0}%`;
+}
+
+function updateProgress(current, total, filename) {
+    document.getElementById("progress-text").innerText = `Processing ${current}/${total}: ${filename}`
+
+    const percent = Math.round(current / total * 100);
+
+    document.getElementById("progressFill").style.width = `${percent}%`;
+    document.getElementById("progressLabel").textContent = `${percent}%`;
+}
+
+function onFinished(outputFolder) {
+    const processFinishedMessage =
+        `<span class="bt-icon-alignment">
+            <img src="./assets/green-circle-check-big.svg" alt="folder icon">
+            Finished! Result saved at <span class="result-highlight">${outputFolder}</span>
+        </span>`;
+
+    document.getElementById("progress-text").innerHTML = processFinishedMessage;
+    hideProgressBar();
 }
 
 function buildProcessingOptions() {
