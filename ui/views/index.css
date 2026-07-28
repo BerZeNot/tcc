@@ -7,14 +7,67 @@ button {
     padding: 10px 18px;
     cursor: pointer;
     margin: 8px 0;
+    border: solid 1px rgb(223, 223, 223);
+    border-radius: 1rem;
+}
+
+.border-b {
+    border-bottom: solid 1px rgb(170, 170, 170);
+}
+
+.border-t {
+    border-top: solid 1px rgb(170, 170, 170);
 }
 
 .input-section {
-    border: solid 1px gray;
     padding: 1rem;
     margin: 0.5rem;
 }
 
+div#selected-folders {
+    max-height: 15rem;
+    overflow-y: auto;
+
+    p {
+        color: rgb(167, 167, 167);
+    }
+}
+
 .input-spacing {
-    margin: 0.5rem;
+    margin: 0.6rem;
+}
+
+select {
+    width: 7rem;
+    height: 1.5rem;
+    border-radius: 6px;
+}
+
+.bt-icon-alignment {
+    display: flex;
+    align-items: center;
+
+    img {
+        padding-right: .5rem;
+    }
+}
+
+.folder-row {
+    display: flex;
+    align-items: center;
+
+    button {
+        border: none;
+        width: 2rem;
+        height: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgb(255, 249, 249);
+    }
+
+    span {
+        width: 15rem;
+        margin: 0 .5rem;
+    }
 }

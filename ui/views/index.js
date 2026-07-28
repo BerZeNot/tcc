@@ -17,14 +17,25 @@ function selectFolder() {
 }
 
 const updateSelectedFoldersDisplay = () => {
-    let foldersListing = document.getElementById("folder-name")
+    let foldersListing = document.getElementById("selected-folders")
     foldersListing.innerHTML = '';
+
+    if (folders.length == 0) {
+        foldersListing.innerHTML = '<p>No folders selected. Add a folder</p>';
+        return;
+    }
+
     for (folderData of folders) {
         let folderNameInBase64 = btoa(folderData.name)
         let template = `
-            <div>
-                <span>${folderData.name}</span>
-                <button name="btRemoveFolder" folderNameInBase64="${folderNameInBase64}" type="button">x</button>
+            <div class="folder-row">
+                <img src="./assets/yellow-folder.svg" alt="folder icon">
+                <span title="${folderData.name}">
+                    ${truncateString(folderData.name, 30)}
+                </span>
+                <button name="btRemoveFolder" folderNameInBase64="${folderNameInBase64}" type="button">
+                    <img src="./assets/red-x.svg" alt="red-x icon">
+                </button>
             </div>
         `;
         foldersListing.innerHTML += template;
@@ -34,8 +45,15 @@ const updateSelectedFoldersDisplay = () => {
     }
 }
 
+const truncateString = (string, maxLength) => {
+    if (string.length > maxLength)
+        return string.substr(0, maxLength) + "...";
+
+    return string;
+}
+
 const removeFolder = (event) => {
-    const folderNameInBase64 = event.target.attributes['folderNameInBase64'].value;
+    const folderNameInBase64 = event.currentTarget.attributes['folderNameInBase64'].value;
     if (!folderNameInBase64)
         return;
 
