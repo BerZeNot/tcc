@@ -3,7 +3,7 @@ from pathlib import Path
 
 USER_HOME_DIR = str(Path.home())
 
-IMAGE_DEFAULT_FORMAT = "bmp"
+DEFAULT_IMAGE_FORMAT = "bmp"
 
 SUPPORTED_IMAGE_FORMATS = ["jpg", "jpeg", "png", "bmp"]
 

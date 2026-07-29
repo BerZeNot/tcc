@@ -6,7 +6,12 @@ if sys.platform.startswith("linux"):
 
 import webview
 from pathlib import Path
-from config.settings import WINDOW_TITLE, USER_HOME_DIR
+from config.settings import (
+    WINDOW_TITLE,
+    USER_HOME_DIR,
+    SUPPORTED_IMAGE_FORMATS,
+    DEFAULT_IMAGE_FORMAT,
+)
 
 
 class MainWindow:
@@ -20,6 +25,12 @@ class MainWindow:
         class API:
             def __init__(self, controller):
                 self.controller = controller
+
+            def get_supported_image_types(self):
+                return SUPPORTED_IMAGE_FORMATS
+
+            def get_default_image_format(self):
+                return DEFAULT_IMAGE_FORMAT
 
             def select_folder(self):
                 result = webview.windows[0].create_file_dialog(

@@ -1,5 +1,27 @@
-let api = null;
+let api;
+let default_image_format;
 const folders = []
+
+window.addEventListener("pywebviewready", async () => {
+    api = window.pywebview.api;
+    await loadSupportedImageTypes();
+});
+
+async function loadSupportedImageTypes() {
+    default_image_format = await api.get_default_image_format();
+    const supportedImageTypes = await api.get_supported_image_types();
+    const imageTypeSelector = document.getElementById("image-type");
+    if (!imageTypeSelector) return;
+
+    supportedImageTypes.forEach(optionString => {
+        const option = document.createElement("option");
+        option.setAttribute("value", optionString);
+        option.innerText = optionString;
+        option.defaultSelected = optionString == default_image_format;
+
+        imageTypeSelector.appendChild(option);
+    });
+}
 
 function selectFolder() {
     if (!api) api = window.pywebview.api;
@@ -116,12 +138,14 @@ function buildProcessingOptions() {
 
     const cutEdgespercentage = document.getElementById("cut-edges-percentage").value ?? 0;
     const invertSegmentImages = document.getElementById("invert-segmented-images").checked ?? false;
+    const image_type = document.getElementById("image-type").value ?? default_image_format ?? "bmp";
     const sperm_type = document.getElementById("sperm-type").value ?? "BULL";
 
     processingOptions["cut_edges"] = cutEdgespercentage;
     processingOptions["invert_segmented_images"] = invertSegmentImages;
     processingOptions["segment_images"] = false;
     processingOptions["sperm_type"] = sperm_type;
+    processingOptions["image_type"] = image_type;
 
     return processingOptions;
 }

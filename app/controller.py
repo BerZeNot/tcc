@@ -18,7 +18,7 @@ from app.image_processor import (
     invert_image,
 )
 from config.settings import (
-    IMAGE_DEFAULT_FORMAT,
+    DEFAULT_IMAGE_FORMAT,
     SUPPORTED_IMAGE_FORMATS,
     DEFAULT_FOLDERS,
     USER_HOME_DIR,
@@ -28,10 +28,11 @@ from config.settings import (
 logger = logging.getLogger(__name__)
 
 
+# TODO: Ajustar o contador de progresso para contar corretamente a quantidade de imagens a ser processada;
 class AppController:
     def __init__(self):
         self.selected_folders = None
-        self.selected_filetype = IMAGE_DEFAULT_FORMAT
+        self.selected_imagetype = DEFAULT_IMAGE_FORMAT
         self.filetype_options = SUPPORTED_IMAGE_FORMATS
         self.processing_thread = None
         self.callback_progress = None
@@ -78,6 +79,7 @@ class AppController:
     def process_images(self, processing_options: dict):
         if processing_options:
             self.processing_options = processing_options
+            self.selected_imagetype = processing_options["image_type"]
 
         if not self.selected_folders:
             logger.warning("No folders selected!")
@@ -105,15 +107,15 @@ class AppController:
         logger.info(f"SELECTED SPERMA TYPE: {selected_sperma_type}")
 
         for current_folder in self.selected_folders:
-            files = get_files_list_in_path(current_folder, self.selected_filetype)
+            files = get_files_list_in_path(current_folder, self.selected_imagetype)
 
             total = len(files)
             if total == 0:
                 logger.info(
-                    f"No files with extension {self.selected_filetype} found inside the folder {current_folder}."
+                    f"No files with extension {self.selected_imagetype} found inside the folder {current_folder}."
                 )
                 if self.callback_finished:
-                    self.callback_finished()
+                    self.callback_finished(self.output_folder_for_current_execution)
                 return
 
             for index, file in enumerate(files, start=1):
