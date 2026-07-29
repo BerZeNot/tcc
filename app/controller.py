@@ -4,7 +4,7 @@ import threading
 import numpy as np
 from datetime import datetime
 from textwrap import dedent
-from utils.file_utils import get_files_list_in_path, create_folder
+from utils.file_utils import get_files_list_in_path, create_folder, count_files_amount
 from lib.gallus_sep_heads import gallus_sep_heads
 from lib.bull_sep_heads import bull_sep_heads
 from lib.bull_semiagr_measurements import bull_semiagr_measurements
@@ -28,7 +28,6 @@ from config.settings import (
 logger = logging.getLogger(__name__)
 
 
-# TODO: Ajustar o contador de progresso para contar corretamente a quantidade de imagens a ser processada;
 class AppController:
     def __init__(self):
         self.selected_folders = None
@@ -102,6 +101,12 @@ class AppController:
         all_results = []
         all_html_file_str = []
         all_image_file_str = []
+
+        total_files_to_process = count_files_amount(
+            self.selected_folders, self.processing_options["image_type"]
+        )
+
+        total_processed_files = 0
 
         selected_sperma_type = self.processing_options["sperm_type"]
         logger.info(f"SELECTED SPERMA TYPE: {selected_sperma_type}")
@@ -223,7 +228,10 @@ class AppController:
                     logger.warning(e)
 
                 if self.callback_progress:
-                    self.callback_progress(index, total, file)
+                    total_processed_files += 1
+                    self.callback_progress(
+                        total_processed_files, total_files_to_process, file
+                    )
 
         all_results_matrix = np.vstack(all_results)
         all_res_sa, all_res_sa_colname = bull_semiagr_measurements(all_results_matrix)
