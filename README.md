@@ -25,7 +25,7 @@ python3 -m venv .venv
 # Linux e Windows
 pip3 install -r requirements.txt
 ```
-Também é possível executar o programa com o script [run.sh](run.sh), que se encontra na 
+Também é possível executar o programa com o script [run.sh](run.sh) (⚠️**apenas em linux***), que se encontra na 
 raiz do projeto. Ele foi criado para ser executado a partir de um atalho do VSCode e 
 executa três quatro: mata qualquer processo antigo do sistema, aguarda 0.5 segundo, 
 ativa o ambiente virtual (*venv*) e executa o programa com o comando `python3 main.py`.
